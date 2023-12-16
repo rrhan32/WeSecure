@@ -20,32 +20,32 @@
             <div class="whyus" ><a href="about" style="color:whitesmoke">WHY US?</a></div>
         </div>
         <div class="child2">
-            <form action="http://localhost:3000/livestream" class="shadow p-3 mb-5 bg-body "  >
-                <div class="row">
-                    <div class="col-12">
+          <form action="http://localhost:3000/login" class="shadow p-3 mb-5 bg-body" method="POST">
+            <div class="row">
+                <div class="col-12">
                     <label for="email"></label>
-                    <input type="email"  placeholder="Enter Email" class="form-control" id="email">
-                    </div>
-                    <div class="col-12">
-                        <label for="password" ></label>
-                        <input type="password" placeholder="Password" class="form-control" id="password">
-                    </div>
-                    <div class="col-12">
+                    <input type="email" placeholder="Enter Email" class="form-control" id="email" name="email" required>
+                </div>
+                <div class="col-12">
+                    <label for="password"></label>
+                    <input type="password" placeholder="Password" class="form-control" id="password" name="password" required>
+                </div>
+                <div class="col-12">
                     <label for="number"></label>
-                    <input type="phone-number"  placeholder="Enter Phone Number" class="form-control" id="number">
-                    </div>
-                    <div class="col-12">
-                    <br><button class="btn btn-primary form-control" type="submit" href="http://localhost:3000/livestream">LOGIN</button>
-                    </div>
-                    <div class="col-12 text-center">
+                    <input type="tel" placeholder="Enter Phone Number" class="form-control" id="number" name="number">
+                </div>
+                <div class="col-12">
+                    <br><button class="btn btn-primary form-control" type="submit">LOGIN</button>
+                </div>
+                <div class="col-12 text-center">
                     <br><a href="http://localhost:3000/forgot">Forgot Password?</a>
-                    </div>
-                    </div>
-                    <div class="col-12">
-                    <hr><br><button class="btn btn-success form-control" type="button" ><a href="http://localhost:3000/create_account" >Create New Account</a> </button>
-                    </div>
-                </div>      
-            </form>
+                </div>
+            </div>
+            <div class="col-12">
+                <hr><br><button class="btn btn-success form-control" type="button"><a href="http://localhost:3000/create_account">Create New Account</a></button>
+            </div>
+        </form>
+        
         </div>
     </div>
     <footer class="w3-center w3-dark-blue w3-padding-64">
