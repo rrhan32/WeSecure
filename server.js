@@ -67,7 +67,6 @@ app.post('/create_account',async(req,res)=>
     })
 app.post('/login',async(req,res)=>{
     try{
-    console.log(req.body);
     const user=await Users.findOne({email:req.body.email});
     if (!user)
     {
