@@ -4,12 +4,17 @@ const mongoose = require('mongoose');
 const path=require("path");
 const bcrypt=require("bcrypt")
 const app=express();
+const cookieParser=require('cookie-parser');
+const jwt=require('jsonwebtoken')
 const Users=require('./models/login')
 const Swal = require('sweetalert2');   //sweetalert to display floating messages
+const dotenv=require('dotenv');
+const axios=require('axios');
+
 
 const saltRounds=10;
-
-
+dotenv.config();
+app.use(cookieParser());
 
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'views'));   //defined the directory
@@ -30,6 +35,32 @@ app.use(express.static(path.join(__dirname, 'css')));     // same as above
 app.use(bodyParser.urlencoded({ extended: true }));   //important for reading the fields of req.body
 
 app.use(bodyParser.json());
+
+
+const create_token=(id)=>{
+    return jwt.sign({id},process.env.ACCESS_TOKEN_KEY ,{expiresIn:'3h'});
+}
+const verifytoken=(req,res,next)=>
+{
+    console.log(req.cookies.jwt);
+    const token=req.cookies.jwt;
+    if (!token) {
+        return res.status(401).redirect('/login');
+    }
+
+    jwt.verify(token,process.env.ACCESS_TOKEN_KEY,(e,decoded)=>
+    {
+        if (e){
+            return res.status(403).json({message:'Forbidden Access'})
+        }
+        else{
+            req.user=decoded;
+        next();
+        }
+    })
+    
+   
+}
 app.get('/',(req,res)=>
    {
     res.render('index')
@@ -38,7 +69,7 @@ app.get('/explore',(req,res)=>
    {
     res.render('explore')
    })
-app.get('/livestream',(req,res)=>
+app.get('/livestream',verifytoken,(req,res)=>
    {
     res.render('livestream')
    })
@@ -58,7 +89,9 @@ app.post('/create_account',async(req,res)=>
         console.log(newuser);
         const New_User=new Users(newuser);
         await New_User.save();
-        res.status(201).redirect('login');
+        const token = create_token(New_User._id);
+        res.cookie("jwt",token);
+        res.status(201).send(New_User);
         }
         catch(e){
             res.status(500).send(e);
@@ -67,6 +100,7 @@ app.post('/create_account',async(req,res)=>
     })
 app.post('/login',async(req,res)=>{
     try{
+        console.log(req.body);
     const user=await Users.findOne({email:req.body.email});
     if (!user)
     {
@@ -75,15 +109,17 @@ app.post('/login',async(req,res)=>{
     const isPasswordValid=await bcrypt.compare(req.body.password,user.password)
     if (isPasswordValid) {
         // Passwords match, user is authenticated
-        return res.status(200).redirect('livestream');
+        const token=create_token(user._id);
+        res.cookie('jwt',token);
+        res.status(200).send(token);
       } else {
         // Passwords do not match
-        Swal.fire({
-            icon: 'error',
-            title: 'Incorrect email or password',
-            text: 'Please try again.',
-      })
-      console.log(Swal.fire);
+    //     Swal.fire({
+    //         icon: 'error',
+    //         title: 'Incorrect email or password',
+    //         text: 'Please try again.',
+    //   })
+    //   console.log(Swal.fire);
     }
     }
      catch (error) {
@@ -91,7 +127,8 @@ app.post('/login',async(req,res)=>{
       res.status(500).json({ message: 'Internal server error' });
     }
   });
-app.get('/visitor_log',(req,res)=>
+
+app.get('/visitor_log',verifytoken,(req,res)=>
    {
     res.render('log')
    })
@@ -99,7 +136,7 @@ app.get('/forgot',(req,res)=>
    {
     res.render('forgot')
    })
-app.get('/upload',(req,res)=>
+app.get('/upload',verifytoken,(req,res)=>
    {
     res.render('page1')
    })
@@ -107,6 +144,11 @@ app.get('/create_account',(req,res)=>
    {
     res.render('practice')
    })
+app.get('/logout',(req,res)=>
+ {
+    res.cookie('jwt',"",{maxAge:"1s"})
+    res.redirect('/');
+})
 app.listen(3000,(req,res)=>
 {
     console.log("app running on 3000");
